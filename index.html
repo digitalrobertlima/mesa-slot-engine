@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Offline - Simulador M.E.S.A.</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --gold: #D4AF37;
+            --neon-green: #00E676;
+            --neon-red: #FF5252;
+            --text: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
+
+        /* Navegação de Telas */
+        .nav-tabs { display: flex; width: 100%; max-width: 400px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: var(--card-bg); }
+        .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: #888; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: var(--gold); color: #000; }
+
+        .screen { width: 100%; max-width: 400px; background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; border: 1px solid #333; }
+        .screen.active { display: block; }
+
+        /* TELA DO JOGADOR */
+        .balance-box { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-bottom: 3px solid var(--gold); }
+        .balance-box h2 { font-size: 1.2rem; color: #aaa; }
+        .balance-box p { font-size: 2.2rem; font-weight: bold; color: var(--gold); }
+
+        .slot-machine { display: flex; justify-content: space-around; background: #000; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #444; overflow: hidden; }
+        .reel { font-size: 3.5rem; width: 80px; text-align: center; height: 80px; line-height: 80px; background: #111; border-radius: 8px; border: 1px solid #222; transition: transform 0.1s ease-in-out; }
+
+        .controls { display: flex; flex-direction: column; gap: 10px; }
+        .bet-selector { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px; }
+        .bet-btn { background: none; border: none; color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        .bet-btn.active { background: #333; color: var(--gold); border: 1px solid var(--gold); }
+        
+        .spin-btn { background: linear-gradient(135deg, #FF9100, #FF3D00); border: none; color: white; padding: 15px; font-size: 1.3rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,61,0,0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .spin-btn:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
+
+        .feedback-msg { text-align: center; font-weight: bold; min-height: 24px; margin-top: 15px; font-size: 1.1rem; }
+        .win-flash { animation: flash 0.4s infinite alternate; }
+
+        /* TELA DO ADMIN */
+        .admin-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--gold); }
+        .admin-card h3 { font-size: 0.9rem; color: #999; text-transform: uppercase; }
+        .admin-card p { font-size: 1.6rem; font-weight: bold; color: #fff; margin-top: 5px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+        .input-group label { font-weight: bold; color: #ccc; }
+        .input-group input { background: #222; border: 1px solid #444; padding: 12px; color: #fff; border-radius: 6px; font-size: 1rem; }
+        .admin-btn { background: var(--gold); color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 5px; }
+
+        @keyframes flash {
+            0% { color: var(--gold); text-shadow: 0 0 5px var(--gold); }
+            100% { color: #fff; text-shadow: 0 0 15px var(--neon-green); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Abas de Navegação (Simulador) -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchScreen('player')">📱 Tela Cliente (Jogo)</button>
+        <button class="tab-btn" onclick="switchScreen('admin')">👴 Painel do Vovô</button>
+    </div>
+
+    <!-- 1. TELA DO JOGADOR -->
+    <div id="player-screen" class="screen active">
+        <div class="balance-box">
+            <h2>Seu Saldo</h2>
+            <p id="player-balance">R$ 0.00</p>
+        </div>
+
+        <div class="slot-machine">
+            <div id="reel1" class="reel">🐯</div>
+            <div id="reel2" class="reel">🐯</div>
+            <div id="reel3" class="reel">🐯</div>
+        </div>
+
+        <div class="controls">
+            <div class="bet-selector">
+                <button class="bet-btn active" onclick="setBet(2)">R$ 2</button>
+                <button class="bet-btn" onclick="setBet(5)">R$ 5</button>
+                <button class="bet-btn" onclick="setBet(10)">R$ 10</button>
+                <button class="bet-btn" onclick="setBet(20)">R$ 20</button>
+            </div>
+            <button id="spin-button" class="spin-btn" onclick="play()">Girar Roleta</button>
+        </div>
+
+        <div id="feedback" class="feedback-msg"></div>
+    </div>
+
+    <!-- 2. TELA DO ADMINISTRADOR -->
+    <div id="admin-screen" class="screen">
+        <h2 style="margin-bottom: 15px; color: var(--gold);">Painel de Controle Físico</h2>
+        
+        <div class="admin-card" style="border-left-color: var(--neon-green);">
+            <h3>Lucro Retido da Casa (30%)</h3>
+            <p id="admin-profit">R$ 0.00</p>
+        </div>
+        
+        <div class="admin-card" style="border-left-color: skyblue;">
+            <h3>Fundo de Prêmios Disponível (70%)</h3>
+            <p id="admin-pool">R$ 0.00</p>
+        </div>
+
+        <div class="admin-card">
+            <h3>Total Arrecadado no Balcão</h3>
+            <p id="admin-total-cash">R$ 0.00</p>
+        </div>
+
+        <hr style="border: 1px solid #333; margin: 20px 0;">
+
+        <!-- Entrada de Crédito Manual -->
+        <div class="input-group">
+            <label>Injetar Crédito (Dinheiro no Balcão)</label>
+            <input type="number" id="cash-in-amount" placeholder="Ex: 20" min="1">
+            <button class="admin-btn" onclick="adminCashIn()">Adicionar Créditos</button>
+        </div>
+    </div>
+
+    <script>
+        // MÁQUINA DE ESTADOS DO SOFTWARE (Simulando Memória do ESP32)
+        let state = {
+            userBalance: 0.00,
+            prizePool: 0.00,    // O fundo dos 70%
+            profitPool: 0.00,   // O bolso do bar/dev de 30%
+            totalCashIn: 0.00,  // Histórico de tudo que entrou físico
+            currentBet: 2
+        };
+
+        const symbols = ['🐯', '🍋', '🍒', '💎', '🔔'];
+
+        function switchScreen(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            if(screen === 'player') {
+                document.getElementById('player-screen').classList.add('active');
+                event.target.classList.add('active');
+            } else {
+                document.getElementById('admin-screen').classList.add('active');
+                event.target.classList.add('active');
+            }
+            updateDOM();
+        }
+
+        function setBet(amount) {
+            state.currentBet = amount;
+            document.querySelectorAll('.bet-btn').forEach(btn => {
+                if(btn.innerText === `R$ ${amount}`) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function adminCashIn() {
+            let input = document.getElementById('cash-in-amount');
+            let value = parseFloat(input.value);
+            if(isNaN(value) || value <= 0) return alert("Digite um valor válido.");
+
+            state.userBalance += value;
+            state.totalCashIn += value;
+            
+            // Divisão cirúrgica na entrada: 30% vai direto pro bolso, 70% pro fundo de jogo
+            state.profitPool += (value * 0.30);
+            state.prizePool += (value * 0.70);
+
+            input.value = '';
+            alert(`R$ ${value.toFixed(2)} injetados com sucesso!`);
+            updateDOM();
+        }
+
+        function updateDOM() {
+            document.getElementById('player-balance').innerText = `R$ ${state.userBalance.toFixed(2)}`;
+            document.getElementById('admin-profit').innerText = `R$ ${state.profitPool.toFixed(2)}`;
+            document.getElementById('admin-pool').innerText = `R$ ${state.prizePool.toFixed(2)}`;
+            document.getElementById('admin-total-cash').innerText = `R$ ${state.totalCashIn.toFixed(2)}`;
+            
+            let spinBtn = document.getElementById('spin-button');
+            if(state.userBalance < state.currentBet) {
+                spinBtn.disabled = true;
+                spinBtn.innerText = "Sem Crédito - Vá ao Balcão";
+            } else {
+                spinBtn.disabled = false;
+                spinBtn.innerText = "Girar Roleta";
+            }
+        }
+
+        // ALGORITMO COMPORTAMENTAL E FINANCEIRO (O Core Logics)
+        function play() {
+            if(state.userBalance < state.currentBet) return;
+
+            // Descontando a aposta do jogador
+            state.userBalance -= state.currentBet;
+            
+            let feedback = document.getElementById('feedback');
+            feedback.className = "feedback-msg";
+            feedback.innerText = "Girando...";
+
+            // Simulação visual rápida
+            let ticks = 0;
+            let interval = setInterval(() => {
+                document.getElementById('reel1').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                document.getElementById('reel2').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                document.getElementById('reel3').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                ticks++;
+                
+                if(ticks > 8) {
+                    clearInterval(interval);
+                    processRNGOutcome();
+                }
+            }, 80);
+        }
+
+        function processRNGOutcome() {
+            let r1, r2, r3;
+            let feedback = document.getElementById('feedback');
+            
+            // Decisão baseada no tamanho do fundo disponível
+            let payoutMaximoGordo = state.currentBet * 5; // Prêmio grande de 5x
+            
+            // Gerador de probabilidade (0 a 99)
+            let rng = Math.floor(Math.random() * 100);
+
+            if (state.prizePool >= payoutMaximoGordo && rng < 15) {
+                // FASE DE LIBERAÇÃO: 15% de chance de dar prêmio gordo real se houver caixa
+                r1 = r2 = r3 = '🐯'; // Bateu o Tigre Triplo!
+                let payout = state.currentBet * 5;
+                state.userBalance += payout;
+                state.prizePool -= payout; // Retira do fundo de prêmios
+                
+                feedback.innerText = `🎉 GRANDE VITÓRIA! Ganhou R$ ${payout.toFixed(2)}!`;
+                feedback.classList.add('win-flash');
+                
+            } else if (rng >= 15 && rng < 45) {
+                // PERDA DISFARÇADA DE VITÓRIA (Loss Disguised as Win)
+                // Dá um prêmio menor que a aposta: Ex: Apostou 10, ganhou 3.
+                r1 = r2 = r3 = '🍋'; 
+                let microPayout = state.currentBet * 0.3; // Devolve só 30% do que ele jogou
+                state.userBalance += microPayout;
+                state.prizePool -= microPayout;
+                
+                feedback.innerText = `✨ COMBINAÇÃO! Ganhou R$ ${microPayout.toFixed(2)}!`;
+                feedback.style.color = "var(--neon-green)";
+                
+            } else if (rng >= 45 && rng < 80) {
+                // GATILHO PSICOLÓGICO: QUASE VITÓRIA (Near Miss)
+                // Mostra dois tigres e passa raspando o terceiro
+                r1 = '🐯';
+                r2 = '🐯';
+                r3 = '💎'; // Raspou!
+                
+                feedback.innerText = "💥 POR MUITO POUCO! O tigre quase soltou!";
+                feedback.style.color = "var(--neon-red)";
+                
+            } else {
+                // PERDA LIMPA (Sem disfarce)
+                r1 = '🍋';
+                r2 = '🍒';
+                r3 = '🔔';
+                feedback.innerText = "Tente novamente na próxima rodada!";
+                feedback.style.color = "#888";
+            }
+
+            // Atualiza os rolos visuais com o resultado real travado pela lógica
+            document.getElementById('reel1').innerText = r1;
+            document.getElementById('reel2').innerText = r2;
+            document.getElementById('reel3').innerText = r3;
+
+            updateDOM();
+        }
+
+        // Inicializa o estado visual
+        updateDOM();
+    </script>
+</body>
+</html>
