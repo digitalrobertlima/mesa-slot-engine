@@ -3,279 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino Offline - Simulador M.E.S.A.</title>
+    <title>M.E.S.A. - Tiger Micro Slot Premium V4</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --gold: #D4AF37;
-            --neon-green: #00E676;
-            --neon-red: #FF5252;
-            --text: #ffffff;
+            --bg-main: #0c0c10;
+            --panel-bg: rgba(20, 20, 28, 0.9);
+            --accent-gold: linear-gradient(135deg, #dfb76c 0%, #f7e0a3 50%, #dfb76c 100%);
+            --gold-flat: #dfb76c;
+            --neon-emerald: #00e676;
+            --neon-ruby: #ff3d00;
+            --text-primary: #f0f0f5;
+            --text-secondary: #7a7a9a;
+            --border-color: #262635;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
 
-        /* Navegação de Telas */
-        .nav-tabs { display: flex; width: 100%; max-width: 400px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: var(--card-bg); }
-        .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: #888; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { background: var(--gold); color: #000; }
-
-        .screen { width: 100%; max-width: 400px; background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; border: 1px solid #333; }
-        .screen.active { display: block; }
-
-        /* TELA DO JOGADOR */
-        .balance-box { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-bottom: 3px solid var(--gold); }
-        .balance-box h2 { font-size: 1.2rem; color: #aaa; }
-        .balance-box p { font-size: 2.2rem; font-weight: bold; color: var(--gold); }
-
-        .slot-machine { display: flex; justify-content: space-around; background: #000; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #444; overflow: hidden; }
-        .reel { font-size: 3.5rem; width: 80px; text-align: center; height: 80px; line-height: 80px; background: #111; border-radius: 8px; border: 1px solid #222; transition: transform 0.1s ease-in-out; }
-
-        .controls { display: flex; flex-direction: column; gap: 10px; }
-        .bet-selector { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px; }
-        .bet-btn { background: none; border: none; color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 6px; font-weight: bold; }
-        .bet-btn.active { background: #333; color: var(--gold); border: 1px solid var(--gold); }
+        body { background-color: var(--bg-main); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; overflow-x: hidden; background-image: radial-gradient(circle at 50% 0%, #1e1e28 0%, transparent 80%); transition: background-color 0.3s; }
         
-        .spin-btn { background: linear-gradient(135deg, #FF9100, #FF3D00); border: none; color: white; padding: 15px; font-size: 1.3rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,61,0,0.4); text-transform: uppercase; letter-spacing: 1px; }
-        .spin-btn:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
+        body.mega-flash { animation: bgFlash 0.5s ease-out; }
+        @keyframes bgFlash { 0% { background-color: var(--gold-flat); } 100% { background-color: var(--bg-main); } }
 
-        .feedback-msg { text-align: center; font-weight: bold; min-height: 24px; margin-top: 15px; font-size: 1.1rem; }
-        .win-flash { animation: flash 0.4s infinite alternate; }
+        /* Abas Superiores */
+        .navigation-header { display: flex; width: 100%; max-width: 440px; background: var(--panel-bg); padding: 6px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); backdrop-filter: blur(10px); position: relative; z-index: 10; }
+        .nav-button { flex: 1; padding: 14px; background: none; border: none; color: var(--text-secondary); font-weight: 700; font-size: 0.95rem; cursor: pointer; border-radius: 8px; transition: all 0.3s ease; }
+        .nav-button.active { background: var(--accent-gold); color: #101014; box-shadow: 0 4px 15px rgba(223, 183, 108, 0.3); }
 
-        /* TELA DO ADMIN */
-        .admin-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--gold); }
-        .admin-card h3 { font-size: 0.9rem; color: #999; text-transform: uppercase; }
-        .admin-card p { font-size: 1.6rem; font-weight: bold; color: #fff; margin-top: 5px; }
+        /* Estrutura das Telas */
+        .app-container { width: 100%; max-width: 440px; background: var(--panel-bg); border-radius: 24px; padding: 24px; box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9); border: 1px solid var(--border-color); backdrop-filter: blur(12px); display: none; position: relative; z-index: 10; }
+        .app-container.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TELA DO JOGADOR --- */
+        .brand-header { text-align: center; margin-bottom: 20px; }
+        .brand-header h1 { font-family: 'Georgia', serif; font-size: 1.8rem; background: var(--accent-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(223, 183, 108, 0.2); }
+
+        .wallet-display { background: rgba(0, 0, 0, 0.6); border-radius: 16px; padding: 15px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border-color); position: relative; }
+        .wallet-display h2 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .wallet-display .balance-value { font-size: 2.2rem; font-weight: 800; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.2); transition: color 0.3s; }
+
+        /* Roleta Premium */
+        .slot-viewport { background: #07070a; border-radius: 20px; padding: 24px 15px; margin-bottom: 25px; border: 2px solid #2a2a35; display: flex; justify-content: space-between; gap: 12px; box-shadow: inset 0 10px 30px rgba(0,0,0,1), 0 5px 15px rgba(0,0,0,0.5); position: relative; }
+        .slot-viewport.shake { animation: vibrate 0.3s infinite linear; border-color: var(--gold-flat); box-shadow: 0 0 20px rgba(223, 183, 108, 0.4), inset 0 10px 30px rgba(0,0,0,1); }
+        .slot-viewport::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: rgba(223, 183, 108, 0.4); transform: translateY(-50%); z-index: 1; pointer-events: none; box-shadow: 0 0 10px var(--gold-flat); }
         
-        .input-group { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
-        .input-group label { font-weight: bold; color: #ccc; }
-        .input-group input { background: #222; border: 1px solid #444; padding: 12px; color: #fff; border-radius: 6px; font-size: 1rem; }
-        .admin-btn { background: var(--gold); color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 5px; }
+        .slot-window { flex: 1; background: linear-gradient(180deg, #0a0a0f 0%, #161622 50%, #0a0a0f 100%); height: 100px; border-radius: 12px; border: 1px solid #1e1e2a; display: flex; justify-content: center; align-items: center; font-size: 3.5rem; text-shadow: 0 5px 15px rgba(0,0,0,0.8); position: relative; z-index: 2; overflow: hidden; }
+        .slot-window.spinning { animation: slotBlur 0.1s infinite linear; }
 
-        @keyframes flash {
-            0% { color: var(--gold); text-shadow: 0 0 5px var(--gold); }
-            100% { color: #fff; text-shadow: 0 0 15px var(--neon-green); }
-        }
+        @keyframes slotBlur { 0% { transform: translateY(-15px); filter: blur(3px); } 50% { transform: translateY(15px); filter: blur(3px); } 100% { transform: translateY(-15px); filter: blur(3px); } }
+        @keyframes vibrate { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-1px, -2px) rotate(-1deg); } 40% { transform: translate(-3px, 0px) rotate(1deg); } 60% { transform: translate(3px, 2px) rotate(0deg); } 80% { transform: translate(1px, -1px) rotate(1deg); } 100% { transform: translate(-1px, 2px) rotate(-1deg); } }
+
+        /* Controles de Aposta Customizáveis */
+        .bet-control-panel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .bet-control-panel label { display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; text-align: center; letter-spacing: 1px; }
+        
+        .bet-editor { display: flex; align-items: center; justify-content: space-between; background: #0c0c10; border-radius: 12px; border: 1px solid #2a2a35; padding: 5px; margin-bottom: 12px; }
+        .bet-btn-adjust { background: #1a1a24; border: none; color: var(--gold-flat); width: 45px; height: 45px; font-size: 1.5rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .bet-btn-adjust:active { transform: scale(0.9); background: var(--gold-flat); color: #000; }
+        
+        .bet-input-wrapper { display: flex; align-items: center; justify-content: center; flex: 1; }
+        .bet-currency { color: var(--gold-flat); font-weight: bold; font-size: 1.2rem; margin-right: 5px; }
+        
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .bet-input { background: transparent; border: none; color: #fff; font-size: 1.8rem; font-weight: 900; width: 100px; text-align: center; outline: none; }
+        .bet-input:focus { border-bottom: 2px solid var(--gold-flat); }
+
+        .bet-quick-add { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .bet-add-btn { background: #1e1e2a; border: 1px solid #2a2a35; color: var(--text-primary); padding: 10px 0; font-size: 0.85rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .bet-add-btn:active { background: #2a2a35; transform: translateY(2px); }
+        .bet-max-btn { background: linear-gradient(135deg, #ff3d00, #ff9100); border: none; color: #fff; font-weight: 900; }
+
+        /* Botão Girar Premium */
+        .action-spin-btn { width: 100%; background: var(--accent-gold); color: #0c0c10; border: none; padding: 22px; font-size: 1.6rem; font-family: 'Georgia', serif; font-weight: 900; border-radius: 16px; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; box-shadow: 0 8px 30px rgba(223, 183, 108, 0.3), inset 0 -4px 10px rgba(0,0,0,0.2); transition: all 0.1s; position: relative; overflow: hidden; }
+        .action-spin-btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg); animation: shine 3s infinite; }
+        @keyframes shine { 0% { transform: translateX(-100%) rotate(30deg); } 100% { transform: translateX(100%) rotate(30deg); } }
+        .action-spin-btn:active { transform: scale(0.97); box-shadow: 0 4px 15px rgba(223, 183, 108, 0.3); }
+        .action-spin-btn:disabled { background: #262635; color: #555; box-shadow: none; cursor: not-allowed; }
+
+        /* --- OVERLAY MÁGICO DE VITÓRIA --- */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .popup-overlay.show { opacity: 1; pointer-events: auto; }
+        .magical-popup { background: radial-gradient(circle at center, #2e2415 0%, #101014 100%); border: 3px solid var(--gold-flat); border-radius: 30px; padding: 50px 30px; text-align: center; transform: scale(0.5); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 80px rgba(223, 183, 108, 0.4), inset 0 0 30px rgba(223, 183, 108, 0.2); width: 90%; max-width: 380px; position: relative; }
+        .popup-overlay.show .magical-popup { transform: scale(1); animation: popupVibrate 0.5s ease; }
+        
+        .huge-icon { font-size: 5rem; margin-bottom: -20px; animation: pulseIcon 1s infinite alternate; text-shadow: 0 0 30px var(--gold-flat); }
+        .magical-popup h2 { font-family: 'Georgia', serif; font-size: 2.5rem; color: var(--gold-flat); margin-top: 10px; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 20px rgba(223, 183, 108, 0.8); }
+        .magical-popup .win-amount { font-size: 4rem; font-weight: 900; color: #fff; margin-bottom: 25px; text-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+        .popup-btn { background: var(--accent-gold); color: #000; border: none; padding: 18px 40px; font-size: 1.3rem; font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(223, 183, 108, 0.4); }
+
+        @keyframes popupVibrate { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.05) rotate(2deg); } 75% { transform: scale(1.05) rotate(-2deg); } }
+        @keyframes pulseIcon { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
+
+        /* Partículas de Confete Pesadas */
+        .particle { position: absolute; font-size: 2.5rem; pointer-events: none; animation: fall linear forwards; z-index: 101; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        @keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+        /* --- PAINEL DO ADMIN (VOVÔ) --- */
+        .senior-input { width: 100%; background: #07070a; border: 2px solid var(--border-color); padding: 20px; font-size: 1.8rem; color: #ffffff; border-radius: 12px; font-weight: 700; margin: 15px 0; text-align: center; }
+        .senior-input:focus { border-color: var(--neon-emerald); outline: none; }
+        .senior-button { width: 100%; background: var(--neon-emerald); color: #000; border: none; padding: 20px; font-size: 1.4rem; font-weight: 900; border-radius: 12px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,230,118,0.2); }
+        .admin-card { background: #15151a; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 6px solid var(--gold-flat); }
+        .admin-card.green { border-left-color: var(--neon-emerald); }
+        .admin-card h3 { font-size: 1rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .admin-card p { font-size: 2.2rem; font-weight: bold; color: #fff; }
     </style>
 </head>
 <body>
 
-    <!-- Abas de Navegação (Simulador) -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchScreen('player')">📱 Tela Cliente (Jogo)</button>
-        <button class="tab-btn" onclick="switchScreen('admin')">👴 Painel do Vovô</button>
+    <!-- Navegação -->
+    <div class="navigation-header">
+        <button class="nav-button active" id="btn-player" onclick="toggleView('player')">📱 Tela Jogador</button>
+        <button class="nav-button" id="btn-admin" onclick="toggleView('admin')">👴 Balcão (Caixa)</button>
     </div>
 
-    <!-- 1. TELA DO JOGADOR -->
-    <div id="player-screen" class="screen active">
-        <div class="balance-box">
-            <h2>Seu Saldo</h2>
-            <p id="player-balance">R$ 0.00</p>
+    <!-- TELA DO JOGADOR -->
+    <div id="screen-player" class="app-container active">
+        <div class="brand-header">
+            <h1>Tiger Premium</h1>
         </div>
 
-        <div class="slot-machine">
-            <div id="reel1" class="reel">🐯</div>
-            <div id="reel2" class="reel">🐯</div>
-            <div id="reel3" class="reel">🐯</div>
+        <div class="wallet-display">
+            <h2>Saldo da Conta</h2>
+            <div id="display-balance" class="balance-value">R$ 0,00</div>
         </div>
 
-        <div class="controls">
-            <div class="bet-selector">
-                <button class="bet-btn active" onclick="setBet(2)">R$ 2</button>
-                <button class="bet-btn" onclick="setBet(5)">R$ 5</button>
-                <button class="bet-btn" onclick="setBet(10)">R$ 10</button>
-                <button class="bet-btn" onclick="setBet(20)">R$ 20</button>
+        <div class="slot-viewport" id="slot-machine">
+            <div id="w1" class="slot-window">🐯</div>
+            <div id="w2" class="slot-window">🐯</div>
+            <div id="w3" class="slot-window">🐯</div>
+        </div>
+
+        <div class="bet-control-panel">
+            <label>Valor da Aposta</label>
+            
+            <div class="bet-editor">
+                <button class="bet-btn-adjust" onclick="adjustBet(-0.10)">-</button>
+                <div class="bet-input-wrapper">
+                    <span class="bet-currency">R$</span>
+                    <input type="number" id="input-bet-amount" class="bet-input" value="0.50" step="0.10" min="0.05" onchange="manualBetEntry()">
+                </div>
+                <button class="bet-btn-adjust" onclick="adjustBet(0.10)">+</button>
             </div>
-            <button id="spin-button" class="spin-btn" onclick="play()">Girar Roleta</button>
+
+            <div class="bet-quick-add">
+                <button class="bet-add-btn" onclick="addBet(0.50)">+ R$0,50</button>
+                <button class="bet-add-btn" onclick="addBet(1.00)">+ R$1,00</button>
+                <button class="bet-add-btn" onclick="addBet(5.00)">+ R$5,00</button>
+                <button class="bet-add-btn bet-max-btn" onclick="setMaxBet()">MÁX</button>
+            </div>
         </div>
 
-        <div id="feedback" class="feedback-msg"></div>
+        <button id="btn-spin" class="action-spin-btn" onclick="executeSpin()">APOSTAR E GIRAR</button>
     </div>
 
-    <!-- 2. TELA DO ADMINISTRADOR -->
-    <div id="admin-screen" class="screen">
-        <h2 style="margin-bottom: 15px; color: var(--gold);">Painel de Controle Físico</h2>
+    <!-- TELA DO ADMIN -->
+    <div id="screen-admin" class="app-container">
+        <h2 style="color:var(--gold-flat); text-align:center; margin-bottom:20px;">PAINEL DE CONTROLE</h2>
         
-        <div class="admin-card" style="border-left-color: var(--neon-green);">
+        <div class="admin-card green">
             <h3>Lucro Retido da Casa (30%)</h3>
-            <p id="admin-profit">R$ 0.00</p>
+            <p id="adm-profit">R$ 0,00</p>
         </div>
-        
-        <div class="admin-card" style="border-left-color: skyblue;">
-            <h3>Fundo de Prêmios Disponível (70%)</h3>
-            <p id="admin-pool">R$ 0.00</p>
-        </div>
-
         <div class="admin-card">
-            <h3>Total Arrecadado no Balcão</h3>
-            <p id="admin-total-cash">R$ 0.00</p>
+            <h3>Fundo de Prêmios (70%)</h3>
+            <p id="adm-pool">R$ 0,00</p>
         </div>
 
-        <hr style="border: 1px solid #333; margin: 20px 0;">
+        <div style="margin-top: 30px;">
+            <label style="color:var(--text-secondary); font-weight:bold;">Receber Dinheiro Físico (R$)</label>
+            <input type="number" id="input-cash" class="senior-input" placeholder="Ex: 10" min="1">
+            <button class="senior-button" onclick="executeCashIn()">Inserir Ficha no Sistema</button>
+        </div>
+    </div>
 
-        <!-- Entrada de Crédito Manual -->
-        <div class="input-group">
-            <label>Injetar Crédito (Dinheiro no Balcão)</label>
-            <input type="number" id="cash-in-amount" placeholder="Ex: 20" min="1">
-            <button class="admin-btn" onclick="adminCashIn()">Adicionar Créditos</button>
+    <!-- OVERLAY MÁGICO DE VITÓRIA -->
+    <div id="popup-win" class="popup-overlay">
+        <div class="magical-popup">
+            <div class="huge-icon">🐯</div>
+            <h2 id="popup-title">MEGA TIGRE!</h2>
+            <div id="popup-amount" class="win-amount">R$ 10,00</div>
+            <button class="popup-btn" onclick="closePopup()">COLETAR PRÊMIO</button>
         </div>
     </div>
 
     <script>
-        // MÁQUINA DE ESTADOS DO SOFTWARE (Simulando Memória do ESP32)
-        let state = {
-            userBalance: 0.00,
-            prizePool: 0.00,    // O fundo dos 70%
-            profitPool: 0.00,   // O bolso do bar/dev de 30%
-            totalCashIn: 0.00,  // Histórico de tudo que entrou físico
-            currentBet: 2
-        };
-
-        const symbols = ['🐯', '🍋', '🍒', '💎', '🔔'];
-
-        function switchScreen(screen) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
-            if(screen === 'player') {
-                document.getElementById('player-screen').classList.add('active');
-                event.target.classList.add('active');
-            } else {
-                document.getElementById('admin-screen').classList.add('active');
-                event.target.classList.add('active');
+        // --- 1. ENGINE DE ÁUDIO SINTÉTICO ---
+        const AudioEngine = (function() {
+            let ctx = null;
+            function init() {
+                if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
             }
-            updateDOM();
+            function playTone(freq, type, duration, vol=0.1) {
+                if(!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + duration);
+            }
+            return {
+                init: init,
+                spinTick: () => playTone(900, 'triangle', 0.05, 0.03),
+                buttonClick: () => playTone(600, 'sine', 0.1, 0.05),
+                nearMiss: () => { playTone(200, 'sawtooth', 0.5, 0.1); setTimeout(() => playTone(150, 'sawtooth', 0.8, 0.15), 200); },
+                microWin: () => { playTone(1200, 'square', 0.1, 0.05); setTimeout(() => playTone(1600, 'square', 0.2, 0.05), 100); },
+                bigWin: () => { 
+                    [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98].forEach((freq, i) => {
+                        setTimeout(() => playTone(freq, 'sine', 0.4, 0.15), i * 100);
+                    });
+                }
+            };
+        })();
+
+        // --- 2. ENGINE MATEMÁTICA E LÓGICA ---
+        let memory = { balance: 0.00, prizePool: 0.00, profitPool: 0.00, activeBet: 0.50 };
+        const reelIcons = ['🐯', '🍋', '🍒', '💎', '🔔', '7️⃣', '💰'];
+
+        // Função de arredondamento de segurança (evita bugs de dízima flutuante do JavaScript)
+        function roundMoney(value) {
+            return Math.round(value * 100) / 100;
         }
 
-        function setBet(amount) {
-            state.currentBet = amount;
-            document.querySelectorAll('.bet-btn').forEach(btn => {
-                if(btn.innerText === `R$ ${amount}`) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
+        // --- Lógica de Aposta Dinâmica ---
+        function updateBetDisplay() {
+            if (memory.activeBet < 0.05) memory.activeBet = 0.05;
+            memory.activeBet = roundMoney(memory.activeBet);
+            document.getElementById('input-bet-amount').value = memory.activeBet.toFixed(2);
+            refreshInterface();
         }
 
-        function adminCashIn() {
-            let input = document.getElementById('cash-in-amount');
-            let value = parseFloat(input.value);
-            if(isNaN(value) || value <= 0) return alert("Digite um valor válido.");
+        function adjustBet(amount) {
+            AudioEngine.init(); AudioEngine.buttonClick();
+            memory.activeBet += amount;
+            updateBetDisplay();
+        }
 
-            state.userBalance += value;
-            state.totalCashIn += value;
+        function addBet(amount) {
+            AudioEngine.init(); AudioEngine.buttonClick();
+            memory.activeBet += amount;
+            updateBetDisplay();
+        }
+
+        function setMaxBet() {
+            AudioEngine.init(); AudioEngine.buttonClick();
+            if(memory.balance > 0) {
+                memory.activeBet = memory.balance;
+                updateBetDisplay();
+            }
+        }
+
+        function manualBetEntry() {
+            AudioEngine.init();
+            let val = parseFloat(document.getElementById('input-bet-amount').value);
+            if(isNaN(val) || val < 0.05) val = 0.05;
+            memory.activeBet = val;
+            updateBetDisplay();
+        }
+
+        // --- Navegação e Caixa ---
+        function toggleView(view) {
+            AudioEngine.init();
+            document.querySelectorAll('.app-container, .nav-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(`screen-${view}`).classList.add('active');
+            document.getElementById(`btn-${view}`).classList.add('active');
+            refreshInterface();
+        }
+
+        function executeCashIn() {
+            AudioEngine.init();
+            let val = parseFloat(document.getElementById('input-cash').value);
+            if(isNaN(val) || val <= 0) return alert("Digite um valor válido.");
+
+            memory.balance = roundMoney(memory.balance + val);
+            memory.profitPool = roundMoney(memory.profitPool + (val * 0.30));
+            memory.prizePool = roundMoney(memory.prizePool + (val * 0.70));
+
+            document.getElementById('input-cash').value = '';
+            AudioEngine.microWin();
+            refreshInterface();
+        }
+
+        function refreshInterface() {
+            document.getElementById('display-balance').innerText = `R$ ${memory.balance.toFixed(2).replace('.', ',')}`;
+            document.getElementById('adm-profit').innerText = `R$ ${memory.profitPool.toFixed(2).replace('.', ',')}`;
+            document.getElementById('adm-pool').innerText = `R$ ${memory.prizePool.toFixed(2).replace('.', ',')}`;
             
-            // Divisão cirúrgica na entrada: 30% vai direto pro bolso, 70% pro fundo de jogo
-            state.profitPool += (value * 0.30);
-            state.prizePool += (value * 0.70);
-
-            input.value = '';
-            alert(`R$ ${value.toFixed(2)} injetados com sucesso!`);
-            updateDOM();
-        }
-
-        function updateDOM() {
-            document.getElementById('player-balance').innerText = `R$ ${state.userBalance.toFixed(2)}`;
-            document.getElementById('admin-profit').innerText = `R$ ${state.profitPool.toFixed(2)}`;
-            document.getElementById('admin-pool').innerText = `R$ ${state.prizePool.toFixed(2)}`;
-            document.getElementById('admin-total-cash').innerText = `R$ ${state.totalCashIn.toFixed(2)}`;
-            
-            let spinBtn = document.getElementById('spin-button');
-            if(state.userBalance < state.currentBet) {
+            let spinBtn = document.getElementById('btn-spin');
+            if(memory.balance < memory.activeBet) {
                 spinBtn.disabled = true;
-                spinBtn.innerText = "Sem Crédito - Vá ao Balcão";
+                spinBtn.innerText = "SALDO INSUFICIENTE";
             } else {
                 spinBtn.disabled = false;
-                spinBtn.innerText = "Girar Roleta";
+                spinBtn.innerText = "APOSTAR E GIRAR";
             }
         }
 
-        // ALGORITMO COMPORTAMENTAL E FINANCEIRO (O Core Logics)
-        function play() {
-            if(state.userBalance < state.currentBet) return;
+        // --- 3. LÓGICA DE GIRO E VOLATILIDADE ---
+        let isSpinning = false;
 
-            // Descontando a aposta do jogador
-            state.userBalance -= state.currentBet;
+        function executeSpin() {
+            if(memory.balance < memory.activeBet || isSpinning) return;
+            AudioEngine.init();
             
-            let feedback = document.getElementById('feedback');
-            feedback.className = "feedback-msg";
-            feedback.innerText = "Girando...";
+            isSpinning = true;
+            memory.balance = roundMoney(memory.balance - memory.activeBet);
+            refreshInterface();
 
-            // Simulação visual rápida
+            const slotContainer = document.getElementById('slot-machine');
+            slotContainer.classList.add('shake'); 
+            
+            const windows = [document.getElementById('w1'), document.getElementById('w2'), document.getElementById('w3')];
+            windows.forEach(w => w.classList.add('spinning'));
+
             let ticks = 0;
-            let interval = setInterval(() => {
-                document.getElementById('reel1').innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                document.getElementById('reel2').innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                document.getElementById('reel3').innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            let spinInterval = setInterval(() => {
+                AudioEngine.spinTick();
+                windows.forEach(w => w.innerText = reelIcons[Math.floor(Math.random() * reelIcons.length)]);
                 ticks++;
-                
-                if(ticks > 8) {
-                    clearInterval(interval);
-                    processRNGOutcome();
+
+                if(ticks > 15) {
+                    clearInterval(spinInterval);
+                    windows.forEach(w => w.classList.remove('spinning'));
+                    slotContainer.classList.remove('shake');
+                    resolveOutcome();
                 }
             }, 80);
         }
 
-        function processRNGOutcome() {
-            let r1, r2, r3;
-            let feedback = document.getElementById('feedback');
-            
-            // Decisão baseada no tamanho do fundo disponível
-            let payoutMaximoGordo = state.currentBet * 5; // Prêmio grande de 5x
-            
-            // Gerador de probabilidade (0 a 99)
+        function resolveOutcome() {
+            let res = ['', '', ''];
             let rng = Math.floor(Math.random() * 100);
+            
+            let maxAward = roundMoney(memory.activeBet * 15); 
 
-            if (state.prizePool >= payoutMaximoGordo && rng < 15) {
-                // FASE DE LIBERAÇÃO: 15% de chance de dar prêmio gordo real se houver caixa
-                r1 = r2 = r3 = '🐯'; // Bateu o Tigre Triplo!
-                let payout = state.currentBet * 5;
-                state.userBalance += payout;
-                state.prizePool -= payout; // Retira do fundo de prêmios
+            // 1. MEGA TIGRE (10%) - Requer caixa no Fundo
+            if (memory.prizePool >= maxAward && rng < 10) {
+                res = ['🐯', '🐯', '🐯'];
+                triggerMegaWin(maxAward, "MEGA TIGRE!");
+            }
+            // 2. MICRO-VITÓRIAS / PERDAS DISFARÇADAS (50%)
+            else if (rng >= 10 && rng < 60) {
+                res = ['🍒', '🍒', '🍋'];
+                let microReturn = roundMoney(memory.activeBet * (Math.random() * (0.8 - 0.3) + 0.3));
+                triggerMicroWin(microReturn);
+            }
+            // 3. NEAR MISS (25%)
+            else if (rng >= 60 && rng < 85) {
+                res = ['💎', '💎', '7️⃣'];
+                AudioEngine.nearMiss();
+                let balDisplay = document.getElementById('display-balance');
+                balDisplay.style.color = "var(--neon-ruby)";
+                setTimeout(() => {
+                    balDisplay.style.color = "#fff";
+                }, 500);
                 
-                feedback.innerText = `🎉 GRANDE VITÓRIA! Ganhou R$ ${payout.toFixed(2)}!`;
-                feedback.classList.add('win-flash');
+                // Correção do Bug de Travamento (Liberação imediata do botão)
+                isSpinning = false;
+                refreshInterface();
+            }
+            // 4. PERDA LIMPA ou BLOQUEIO POR FALTA DE CAIXA (Proteção do Bar)
+            else {
+                res = ['7️⃣', '🍋', '🔔'];
                 
-            } else if (rng >= 15 && rng < 45) {
-                // PERDA DISFARÇADA DE VITÓRIA (Loss Disguised as Win)
-                // Dá um prêmio menor que a aposta: Ex: Apostou 10, ganhou 3.
-                r1 = r2 = r3 = '🍋'; 
-                let microPayout = state.currentBet * 0.3; // Devolve só 30% do que ele jogou
-                state.userBalance += microPayout;
-                state.prizePool -= microPayout;
-                
-                feedback.innerText = `✨ COMBINAÇÃO! Ganhou R$ ${microPayout.toFixed(2)}!`;
-                feedback.style.color = "var(--neon-green)";
-                
-            } else if (rng >= 45 && rng < 80) {
-                // GATILHO PSICOLÓGICO: QUASE VITÓRIA (Near Miss)
-                // Mostra dois tigres e passa raspando o terceiro
-                r1 = '🐯';
-                r2 = '🐯';
-                r3 = '💎'; // Raspou!
-                
-                feedback.innerText = "💥 POR MUITO POUCO! O tigre quase soltou!";
-                feedback.style.color = "var(--neon-red)";
-                
-            } else {
-                // PERDA LIMPA (Sem disfarce)
-                r1 = '🍋';
-                r2 = '🍒';
-                r3 = '🔔';
-                feedback.innerText = "Tente novamente na próxima rodada!";
-                feedback.style.color = "#888";
+                // Correção do Bug de Travamento (Liberação imediata do botão)
+                isSpinning = false;
+                refreshInterface();
             }
 
-            // Atualiza os rolos visuais com o resultado real travado pela lógica
-            document.getElementById('reel1').innerText = r1;
-            document.getElementById('reel2').innerText = r2;
-            document.getElementById('reel3').innerText = r3;
-
-            updateDOM();
+            document.getElementById('w1').innerText = res[0];
+            document.getElementById('w2').innerText = res[1];
+            document.getElementById('w3').innerText = res[2];
         }
 
-        // Inicializa o estado visual
-        updateDOM();
+        // --- 4. SISTEMA VISUAL EXPLOSIVO ---
+        function triggerMicroWin(amount) {
+            memory.balance = roundMoney(memory.balance + amount);
+            memory.prizePool = roundMoney(memory.prizePool - amount);
+            AudioEngine.microWin();
+            
+            let balDisplay = document.getElementById('display-balance');
+            balDisplay.style.color = "var(--neon-emerald)";
+            balDisplay.innerText = `+ R$ ${amount.toFixed(2).replace('.', ',')}`;
+            setTimeout(() => {
+                balDisplay.style.color = "#fff";
+                refreshInterface();
+                isSpinning = false;
+            }, 800);
+        }
+
+        function triggerMegaWin(amount, title) {
+            memory.balance = roundMoney(memory.balance + amount);
+            memory.prizePool = roundMoney(memory.prizePool - amount);
+            
+            AudioEngine.bigWin();
+            
+            document.body.classList.add('mega-flash');
+            setTimeout(() => document.body.classList.remove('mega-flash'), 500);
+
+            document.getElementById('popup-title').innerText = title;
+            document.getElementById('popup-amount').innerText = `R$ ${amount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('popup-win').classList.add('show');
+            createHeavyConfetti();
+        }
+
+        function closePopup() {
+            document.getElementById('popup-win').classList.remove('show');
+            refreshInterface();
+            isSpinning = false; // Destrava o botão após o jogador coletar o prêmio
+            document.querySelectorAll('.particle').forEach(p => p.remove());
+        }
+
+        function createHeavyConfetti() {
+            const symbols = ['💰', '✨', '💎', '🐯', '🔥', '💵'];
+            for(let i=0; i<80; i++) {
+                let el = document.createElement('div');
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                el.className = 'particle';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = (Math.random() * 2 + 1.5) + 'rem'; 
+                el.style.animationDuration = (Math.random() * 2.5 + 1.5) + 's';
+                el.style.animationDelay = (Math.random() * 0.5) + 's'; 
+                document.body.appendChild(el);
+            }
+        }
+
+        // Init
+        updateBetDisplay();
     </script>
 </body>
 </html>
